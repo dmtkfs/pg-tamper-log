@@ -21,7 +21,7 @@ SELECT '--- Current log state ---' AS msg;
 
 TABLE audit_log;
 
--- 4. ⚠️  Simulate an attacker who edits row 2
+-- 4. Simulate an attacker who edits row 2
 --    We must disable the "no‑mods" trigger briefly
 ALTER TABLE audit_log DISABLE TRIGGER audit_log_block_mods;
 
