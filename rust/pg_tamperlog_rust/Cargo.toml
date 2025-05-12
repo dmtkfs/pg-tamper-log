@@ -3,6 +3,9 @@ name = "pg_tamperlog_rust"
 version = "0.0.0"
 edition = "2021"
 
+[pg17]
+pg_config = "C:\\Program Files\\PostgreSQL\\17\\bin\\pg_config.exe"
+
 [lib]
 crate-type = ["cdylib", "lib"]
 
