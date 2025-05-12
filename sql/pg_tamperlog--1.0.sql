@@ -37,10 +37,24 @@ SELECT
     event,
     prev_hash,
     hash,
+    -- expected values computed on the fly
+    COALESCE(lag(hash) OVER (ORDER BY id), '')                       AS expected_prev_hash,
+    encode(
+      digest(
+        (COALESCE(lag(hash) OVER (ORDER BY id), '') || event::text)::bytea,
+        'sha256'
+      ), 'hex'
+    ) AS expected_hash,
     CASE
-        WHEN prev_hash != lag(hash) OVER (
-            ORDER BY id
-        ) THEN 'MISMATCH'
-        ELSE NULL
+      WHEN hash        != encode(
+                            digest(
+                              (COALESCE(lag(hash) OVER (ORDER BY id), '') || event::text)::bytea,
+                              'sha256'
+                            ), 'hex'
+                          )
+        OR prev_hash   != COALESCE(lag(hash) OVER (ORDER BY id), '')
+      THEN 'TAMPERED'
+      ELSE NULL
     END AS integrity_check
-FROM audit_log;
+FROM audit_log
+ORDER BY id;
