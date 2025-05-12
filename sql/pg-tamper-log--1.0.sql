@@ -1,10 +1,10 @@
 -- Audit_log table
 CREATE TABLE audit_log (
-  id         BIGSERIAL PRIMARY KEY,
-  ts         TIMESTAMPTZ NOT NULL DEFAULT now(),
-  event      JSONB        NOT NULL,
-  prev_hash  TEXT,
-  hash       TEXT         NOT NULL
+    id BIGSERIAL PRIMARY KEY,
+    ts TIMESTAMPTZ NOT NULL DEFAULT now(),
+    event JSONB NOT NULL,
+    prev_hash TEXT,
+    hash TEXT NOT NULL
 );
 
 -- Hashing trigger function
@@ -18,7 +18,7 @@ BEGIN
   LIMIT 1;
 
   NEW.prev_hash := COALESCE(last_hash, '');
-  NEW.hash := encode(digest(NEW.prev_hash || NEW.event::text, 'sha256'), 'hex');
+  NEW.hash := encode(digest((NEW.prev_hash || NEW.event::text)::bytea, 'sha256'), 'hex');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -31,10 +31,16 @@ EXECUTE FUNCTION audit_log_hash();
 
 -- View to detect tampering
 CREATE OR REPLACE VIEW tamper_log_verify AS
-SELECT id, ts, event, prev_hash, hash,
-       CASE
-         WHEN prev_hash != lag(hash) OVER (ORDER BY id)
-         THEN 'MISMATCH'
-         ELSE NULL
-       END AS integrity_check
+SELECT
+    id,
+    ts,
+    event,
+    prev_hash,
+    hash,
+    CASE
+        WHEN prev_hash != lag(hash) OVER (
+            ORDER BY id
+        ) THEN 'MISMATCH'
+        ELSE NULL
+    END AS integrity_check
 FROM audit_log;
