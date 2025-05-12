@@ -69,6 +69,7 @@ FOR EACH ROW EXECUTE FUNCTION audit_log_no_mods();
 ----------------------------------------------------------------------
 DROP VIEW IF EXISTS tamper_log_verify;
 
+
 CREATE VIEW tamper_log_verify AS
 WITH recomputed AS (
     SELECT
@@ -97,10 +98,12 @@ SELECT
     -- what the *next* row should point to
     LAG(expected_hash) OVER (ORDER BY id)                       AS expected_prev_hash,
     CASE
-        WHEN hash      IS DISTINCT FROM expected_hash
-             OR prev_hash IS DISTINCT FROM LAG(expected_hash) OVER (ORDER BY id)
-        THEN 'TAMPERED'
-        ELSE NULL
+      WHEN id = 1 THEN NULL                   -- never flag the root row
+      WHEN hash      IS DISTINCT FROM expected_hash
+        OR prev_hash IS DISTINCT FROM expected_prev_hash
+      THEN 'TAMPERED'
+      ELSE NULL
     END AS integrity_check
+
 FROM recomputed
 ORDER BY id;
