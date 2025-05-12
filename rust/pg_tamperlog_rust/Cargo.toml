@@ -1,0 +1,40 @@
+[package]
+name = "pg_tamperlog_rust"
+version = "0.0.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[[bin]]
+name = "pgrx_embed_pg_tamperlog_rust"
+path = "./src/bin/pgrx_embed.rs"
+
+[features]
+default = ["pg13"]
+pg13 = ["pgrx/pg13", "pgrx-tests/pg13" ]
+pg14 = ["pgrx/pg14", "pgrx-tests/pg14" ]
+pg15 = ["pgrx/pg15", "pgrx-tests/pg15" ]
+pg16 = ["pgrx/pg16", "pgrx-tests/pg16" ]
+pg17 = ["pgrx/pg17", "pgrx-tests/pg17" ]
+pg_test = []
+
+[dependencies]
+pgrx = "=0.14.3"
+
+[dev-dependencies]
+pgrx-tests = "=0.14.3"
+
+[profile.dev]
+panic = "unwind"
+
+[profile.release]
+panic = "unwind"
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+
+[dependencies]
+pgrx = "0.11"
+sha2 = "0.10"
+hex  = "0.4"
