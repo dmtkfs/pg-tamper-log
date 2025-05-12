@@ -70,6 +70,7 @@ FOR EACH ROW EXECUTE FUNCTION audit_log_no_mods();
 
 DROP VIEW IF EXISTS tamper_log_verify;
 
+CREATE VIEW tamper_log_verify AS
 WITH recomputed AS (
     SELECT
         id,
@@ -87,19 +88,19 @@ WITH recomputed AS (
     FROM audit_log
 )
 SELECT
-    id,
-    ts,
-    event,
-    prev_hash,
-    hash,
-    expected_hash,
+    r.id,
+    r.ts,
+    r.event,
+    r.prev_hash,
+    r.hash,
+    r.expected_hash,
     /* expected_prev_hash = recomputed hash of previous row */
-    LAG(expected_hash) OVER (ORDER BY id) AS expected_prev_hash,
+    LAG(r.expected_hash) OVER (ORDER BY r.id) AS expected_prev_hash,
     CASE
-      WHEN hash      IS DISTINCT FROM expected_hash
-        OR prev_hash IS DISTINCT FROM LAG(expected_hash) OVER (ORDER BY id)
+      WHEN r.hash      IS DISTINCT FROM r.expected_hash
+        OR r.prev_hash IS DISTINCT FROM LAG(r.expected_hash) OVER (ORDER BY r.id)
       THEN 'TAMPERED'
       ELSE NULL
     END AS integrity_check
-INTO  tamper_log_verify;
--- CREATE VIEW tamper_log_verify AS …
+FROM   recomputed r
+ORDER  BY r.id;
