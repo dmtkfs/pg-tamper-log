@@ -94,7 +94,7 @@ SELECT
     /* expected_prev_hash = recomputed hash of previous row */
     LAG(r.expected_hash) OVER (ORDER BY r.id) AS expected_prev_hash,
     CASE
-      WHEN id = 1 THEN NULL
+      WHEN id = (SELECT MIN(id) FROM audit_log) THEN NULL
       WHEN r.hash      IS DISTINCT FROM r.expected_hash
         OR r.prev_hash IS DISTINCT FROM LAG(r.expected_hash) OVER (ORDER BY r.id)
       THEN 'TAMPERED'
