@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
 Tamper‑evident audit log extension
-pg_tamperlog--1.0.sql
+pg_tamperlog--1.1.sql
 --------------------------------------------------------------------*/
 
 -- ensure the Rust helper is present; no‑op if it's already installed

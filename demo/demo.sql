@@ -1,12 +1,15 @@
 /*------------------------------------------------------------------
-demo/demo.sql  – Showcase pg_tamperlog in action
+demo/demo.sql  – Showcase pg_tamperlog v1.1 (Rust‑accelerated)
 ------------------------------------------------------------------*/
 
 -- 0. Prereqs (first run only)
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+CREATE EXTENSION IF NOT EXISTS pg_tamperlog_rust;
+-- load Rust helper
+
 -- 1. Load the extension from source (dev mode)
-\i sql/pg_tamperlog--1.0.sql
+\i sql/pg_tamperlog--1.1.sql
 
 -- 2. Reset any previous demo data
 TRUNCATE audit_log RESTART IDENTITY;
@@ -22,7 +25,6 @@ SELECT '--- Current log state ---' AS msg;
 TABLE audit_log;
 
 -- 4. Simulate an attacker who edits row 2
---    We must disable the "no‑mods" trigger briefly
 ALTER TABLE audit_log DISABLE TRIGGER audit_log_block_mods;
 
 UPDATE audit_log
@@ -53,13 +55,18 @@ WHERE
 \echo
 \echo 'Attempting a second UPDATE (should fail because trigger is back on):'
 \echo
-
 DO $$
 BEGIN
   BEGIN
-    UPDATE audit_log SET event = '{"user":"mallory","action":"blocked"}' WHERE id = 3;
-  EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'Caught expected error: %', SQLERRM;
-  END;
+    UPDATE audit_log
+    SET    event = '{"user":"mallory","action":"blocked"}'
+    WHERE  id = 3;
+
+EXCEPTION WHEN OTHERS THEN RAISE NOTICE 'Caught expected error: %',
+SQLERRM;
+
 END;
+
+END;
+
 $$;
