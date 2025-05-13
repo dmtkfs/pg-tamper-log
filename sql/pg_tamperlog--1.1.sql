@@ -3,6 +3,9 @@ Tamper‑evident audit log extension
 pg_tamperlog--1.0.sql
 --------------------------------------------------------------------*/
 
+-- ensure the Rust helper is present; no‑op if it's already installed
+CREATE EXTENSION IF NOT EXISTS pg_tamperlog_rust;
+
 ----------------------------------------------------------------------
 -- 1.  TABLE
 ----------------------------------------------------------------------
