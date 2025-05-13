@@ -1,0 +1,1 @@
+\i sql/pg_tamperlog--1.1.sql
