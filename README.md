@@ -78,7 +78,7 @@ The extension will automatically use the faster Rust hashing function.
 Run a full demonstration:
 
 ```bash
-psql -U postgres -d your_database -f demo/demo.sql
+psql -U postgres -d logdemo -f demo/demo.sql
 ```
 
 This demo:
